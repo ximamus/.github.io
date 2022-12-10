@@ -4,6 +4,16 @@ const ctx = cvs.getContext('2d');
 const snowflakes = [];
 let snow = [];
 let qnty = 100;
+let snowMatrix = Array.from(Array(900), () => new Array(600));
+
+function initSnowMatrix() {
+    for (let i = 0; i <= 300; i++) {
+        for (let j = 0; j <= 150; j++) {
+            snowMatrix[i][j] = 0;
+        }
+        snowMatrix[i][149] = 1;
+    }
+}
 
 function getSnowflakes() {
     for (let i = 0; i < qnty; i++) {
@@ -19,12 +29,27 @@ function getSnowflakes() {
 }
 
 function clearSnow() {
-    let maxSnow = 600;
-    snow.forEach(s => {
-        if (s.y < maxSnow) maxSnow = s.y;
-    });
-    const clearedSnow = snow.filter(s => s.y > maxSnow + 10);
-    snow = clearedSnow;
+    //let maxSnow = 600;
+    let maxSnow = 150;
+    // snow.forEach(s => {
+    //     if (s.y < maxSnow) maxSnow = s.y;
+    // });
+    // const clearedSnow = snow.filter(s => s.y > maxSnow + 10);
+    // snow = clearedSnow;
+    for (let i = 0; i <= 300; i++) {
+        for (let j = 0; j <= 150; j++) {
+            if (snowMatrix[i][j] == 1 && j < maxSnow) {
+                maxSnow = j;
+            }
+        }
+    }
+    for (let i = 0; i <= 300; i++) {
+        for (let j = maxSnow; j <= maxSnow + 10; j++) {
+            if (j != 149) {
+                snowMatrix[i][j] = 0;
+            }
+        }
+    }
 }
 
 function moreSnow() {
@@ -35,12 +60,45 @@ function moreSnow() {
 function moveSnowflake(snowflake) {
     if (Math.random() < 0.5) {
         snowflake.x += Math.random() < 0.5 ? -1 : 1;
+        if (snowflake.x < 0) {
+            snowflake.x = 0;
+        }
+        else if (snowflake.x > 300) {
+            snowflake.x = 300;
+        }
     }
-    snowflake.y += Math.floor(Math.random() * (2 - 1)) + 1;
+    snowflake.y += Math.floor(Math.random() * (2 - 1) + 1);
+    //if (snowflake.y == cvs.height) {
+    if (snowMatrix[snowflake.x][snowflake.y] == 1) {
+        //insertSnow(snowflake.x, snowflake.y);
+        insertSnowMatrix(snowflake.x, snowflake.y);
+        //snowflake.x = Math.floor(Math.random() * cvs.width);
+        //snowflake.y = 0;
+    }
     if (snowflake.y == cvs.height) {
-        insertSnow(snowflake.x, snowflake.y);
         snowflake.x = Math.floor(Math.random() * cvs.width);
         snowflake.y = 0;
+    }
+}
+
+function insertSnowMatrix(x, y) {
+    if (y < 148 && x > 0 && x < 300) {
+        if (snowMatrix[x - 1][y] == 1 && snowMatrix[x + 1][y] == 1) {
+            snowMatrix[x][y - 1] = 1;
+        }
+    }
+    else if (y < 148 && x == 0) {
+        if (snowMatrix[x + 1][y] == 1) {
+            snowMatrix[x][y - 1] = 1;
+        }
+    }
+    else if (y < 148 && x == 300) {
+        if (snowMatrix[x - 1][y] == 1) {
+            snowMatrix[x][y - 1] = 1;
+        }
+    }
+    else {
+        snowMatrix[x][y - 1] = 1;
     }
 }
 
@@ -60,9 +118,17 @@ function draw() {
         moveSnowflake(snowflakes[i]);
         ctx.fillRect(snowflakes[i].x, snowflakes[i].y, 1, 1);
     }
-    for (let j = 0; j < snow.length; j++) {
-        ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
+    // for (let j = 0; j < snow.length; j++) {
+    //     ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
+    // }
+    for (let i = 0; i < 900; i++) {
+        for (let j = 0; j < 600; j++) {
+            if (snowMatrix[i][j] == 1) {
+                ctx.fillRect(i, j, 1, 1);
+            }
+        }
     }
 }
 
+initSnowMatrix();
 const run = setInterval(draw, 50);
