@@ -85,17 +85,17 @@ function moveSnowflake(snowflake) {
 }
 
 function insertSnowMatrix(x, y) {
-    if (y < 149 && x > 0 && x < 300) {
+    if (y < 150 && x > 0 && x < 300) {
         if (snowMatrix[x - 1][y] == 1 && snowMatrix[x + 1][y] == 1) {
             snowMatrix[x][y - 1] = 1;
         }
     }
-    else if (y < 149 && x == 0) {
+    else if (y < 150 && x == 0) {
         if (snowMatrix[x + 1][y] == 1) {
             snowMatrix[x][y - 1] = 1;
         }
     }
-    else if (y < 149 && x == 300) {
+    else if (y < 150 && x == 300) {
         if (snowMatrix[x - 1][y] == 1) {
             snowMatrix[x][y - 1] = 1;
         }
