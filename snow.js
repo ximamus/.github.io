@@ -7,14 +7,14 @@ ctx.fillStyle = 'white';
 const snowflakes = [];
 let snow = [];
 let qnty = 100;
-let snowMatrix = Array.from(Array(900), () => new Array(600));
+let snowMatrix = Array.from(Array(301), () => new Array(151));
 
 function initSnowMatrix() {
     for (let i = 0; i <= 300; i++) {
         for (let j = 0; j <= 150; j++) {
             snowMatrix[i][j] = 0;
         }
-        snowMatrix[i][149] = 1;
+        snowMatrix[i][150] = 1;
     }
 }
 
@@ -26,7 +26,7 @@ function getSnowflakes() {
         };
         snowflake.x = Math.floor(Math.random() * cvs.width);
         snowflake.y = Math.floor(Math.random() * cvs.height);
-        // snowflake.y = 0;
+        //snowflake.y = 0;
         snowflakes.push(snowflake);
     }
 }
@@ -85,17 +85,17 @@ function moveSnowflake(snowflake) {
 }
 
 function insertSnowMatrix(x, y) {
-    if (y < 148 && x > 0 && x < 300) {
+    if (y < 149 && x > 0 && x < 300) {
         if (snowMatrix[x - 1][y] == 1 && snowMatrix[x + 1][y] == 1) {
             snowMatrix[x][y - 1] = 1;
         }
     }
-    else if (y < 148 && x == 0) {
+    else if (y < 149 && x == 0) {
         if (snowMatrix[x + 1][y] == 1) {
             snowMatrix[x][y - 1] = 1;
         }
     }
-    else if (y < 148 && x == 300) {
+    else if (y < 149 && x == 300) {
         if (snowMatrix[x - 1][y] == 1) {
             snowMatrix[x][y - 1] = 1;
         }
@@ -146,9 +146,24 @@ function draw() {
         }
     }
     ctx.putImageData(id, 0, 0);
+    checkGameOver();
 
     //let time2 = new Date().getTime();
     //console.log((time2 - time1) / 1000 );
+}
+
+function checkGameOver() {    
+    for (let i = 0; i <= 300; i++) {
+        for (let j = 0; j <= 150; j++) {
+            if (snowMatrix[i][j] == 0) {
+                return;
+            }
+        }
+    }
+    ctx.fillStyle = 'black';
+    ctx.font = '30px Changa One';
+    ctx.fillText('Завалило снегом!', 40, 80);
+    clearInterval(run);
 }
 
 initSnowMatrix();
