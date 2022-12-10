@@ -1,5 +1,8 @@
 const cvs = document.getElementById('canvas');
-const ctx = cvs.getContext('2d');
+const ctx = cvs.getContext('2d', { willReadFrequently: true });
+ctx.fillStyle = 'white';
+//var id = ctx.getImageData(0, 0, cvs.width, cvs.height);
+//var pixels = id.data;
 
 const snowflakes = [];
 let snow = [];
@@ -111,23 +114,41 @@ function insertSnow(x, y) {
     snow.push({ x: x, y: y});
 }
 
-function draw() {
-    ctx.fillStyle = 'white';
+function draw() {    
     ctx.clearRect(0, 0, cvs.width, cvs.height);
+    let id = ctx.getImageData(0, 0, cvs.width, cvs.height);
+    let pixels = id.data;
+
+    //let time1 = new Date().getTime();
+
     for (let i = 0; i < snowflakes.length; i++) {        
         moveSnowflake(snowflakes[i]);
-        ctx.fillRect(snowflakes[i].x, snowflakes[i].y, 1, 1);
+        //ctx.fillRect(snowflakes[i].x, snowflakes[i].y, 1, 1);
+        let off = (snowflakes[i].y * id.width + snowflakes[i].x) * 4;
+        pixels[off] = 255;
+        pixels[off + 1] = 255;
+        pixels[off + 2] = 255;
+        pixels[off + 3] = 255;
     }
     // for (let j = 0; j < snow.length; j++) {
     //     ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
     // }
-    for (let i = 0; i < 900; i++) {
-        for (let j = 0; j < 600; j++) {
+    for (let i = 0; i <= 300; i++) {
+        for (let j = 0; j <= 150; j++) {
             if (snowMatrix[i][j] == 1) {
-                ctx.fillRect(i, j, 1, 1);
+                //ctx.fillRect(i, j, 1, 1);
+                let off = (j * id.width + i) * 4;
+                pixels[off] = 255;
+                pixels[off + 1] = 255;
+                pixels[off + 2] = 255;
+                pixels[off + 3] = 255;
             }
         }
     }
+    ctx.putImageData(id, 0, 0);
+
+    //let time2 = new Date().getTime();
+    //console.log((time2 - time1) / 1000 );
 }
 
 initSnowMatrix();
