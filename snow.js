@@ -48,7 +48,7 @@ function clearSnow() {
     }
     for (let i = 0; i <= 300; i++) {
         for (let j = maxSnow; j <= maxSnow + 10; j++) {
-            if (j != 149) {
+            if (j != 150) {
                 snowMatrix[i][j] = 0;
             }
         }
