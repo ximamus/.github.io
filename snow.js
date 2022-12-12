@@ -8,6 +8,25 @@ const snowflakes = [];
 let snow = [];
 let qnty = 100;
 let snowMatrix = Array.from(Array(301), () => new Array(151));
+const wind = {
+    direction: '',
+    positionY: 0,
+    height: 0,
+    force: 0,
+    duration: 0
+};
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function initWind() {
+    wind.direction = Math.random() < 0.5 ? 'right' : 'left';
+    wind.positionY = getRandomInt(50, 100);
+    wind.height = getRandomInt(50, 150);
+    wind.force = getRandomInt(4, 8);
+    wind.duration = getRandomInt(30, 60);
+}
 
 function initSnowMatrix() {
     for (let i = 0; i <= 300; i++) {
@@ -22,7 +41,8 @@ function getSnowflakes() {
     for (let i = 0; i < qnty; i++) {
         const snowflake = {
             x: 0,
-            y: 0
+            y: 0,
+            inertion: 0
         };
         snowflake.x = Math.floor(Math.random() * cvs.width);
         snowflake.y = Math.floor(Math.random() * cvs.height);
@@ -63,11 +83,23 @@ function moreSnow() {
 function moveSnowflake(snowflake) {
     if (Math.random() < 0.5) {
         snowflake.x += Math.random() < 0.5 ? -1 : 1;
+        if (wind.duration > 0 && snowflake.y > wind.positionY - wind.height / 2 && snowflake.y < wind.positionY + wind.height / 2) {
+            snowflake.inertion = wind.direction == 'right' ? wind.force : wind.force * -1
+            snowflake.x += snowflake.inertion;
+        }
+        else if (wind.duration == 0 && snowflake.y > wind.positionY - wind.height / 2 && snowflake.y < wind.positionY + wind.height / 2) {
+            snowflake.x += snowflake.inertion;
+            if (snowflake.inertion > 0) {
+                snowflake.inertion -= 1;
+            }
+        }
         if (snowflake.x < 0) {
             snowflake.x = 0;
+            snowflake.inertion = 0;
         }
         else if (snowflake.x > 300) {
             snowflake.x = 300;
+            snowflake.inertion = 0;
         }
     }
     snowflake.y += Math.floor(Math.random() * (2 - 1) + 1);
@@ -81,6 +113,7 @@ function moveSnowflake(snowflake) {
     if (snowflake.y == cvs.height) {
         snowflake.x = Math.floor(Math.random() * cvs.width);
         snowflake.y = 0;
+        snowflake.inertion = 0;
     }
 }
 
@@ -111,7 +144,7 @@ function insertSnow(x, y) {
             y = snow[i].y - 1;
         }
     }
-    snow.push({ x: x, y: y});
+    snow.push({ x: x, y: y });
 }
 
 function draw() {    
@@ -121,7 +154,7 @@ function draw() {
 
     //let time1 = new Date().getTime();
 
-    for (let i = 0; i < snowflakes.length; i++) {        
+    for (let i = 0; i < snowflakes.length; i++) {
         moveSnowflake(snowflakes[i]);
         //ctx.fillRect(snowflakes[i].x, snowflakes[i].y, 1, 1);
         let off = (snowflakes[i].y * id.width + snowflakes[i].x) * 4;
@@ -147,6 +180,9 @@ function draw() {
     }
     ctx.putImageData(id, 0, 0);
     checkGameOver();
+    if (wind.duration > 0) {
+        wind.duration -= 1;
+    }
 
     //let time2 = new Date().getTime();
     //console.log((time2 - time1) / 1000 );
@@ -168,3 +204,11 @@ function checkGameOver() {
 
 initSnowMatrix();
 const run = setInterval(draw, 50);
+
+(function windLoop() {
+    var timeout = Math.round(Math.random() * (8000 - 6000) + 6000);
+    setTimeout(function() {
+        initWind();
+        windLoop();
+    }, timeout);
+}());
