@@ -8,7 +8,8 @@ let gameOver = false;
 const snowflakes = [];
 let snow = [];
 let qnty = 100;
-let snowMatrix = Array.from(Array(301), () => new Array(151));
+let snowMatrix;
+let snowMatrixBack;
 const wind = {
     direction: '',
     positionY: 0,
@@ -31,11 +32,11 @@ function initWind() {
 }
 
 function initSnowMatrix() {
+    snowMatrix = Array.from(Array(301), () => new Array(151).fill(0));
+    snowMatrixBack = Array.from(Array(301), () => new Array(151).fill(0));
     for (let i = 0; i <= 300; i++) {
-        for (let j = 0; j <= 150; j++) {
-            snowMatrix[i][j] = 0;
-        }
         snowMatrix[i][150] = 1;
+        snowMatrixBack[i][150] = 1;
     }
 }
 
@@ -75,6 +76,21 @@ function clearSnow() {
         for (let j = maxSnow; j <= maxSnow + 10; j++) {
             if (j != 150) {
                 snowMatrix[i][j] = 0;
+            }
+        }
+    }
+    maxSnow = 150;
+    for (let i = 0; i <= 300; i++) {
+        for (let j = 0; j <= 150; j++) {
+            if (snowMatrixBack[i][j] == 1 && j < maxSnow) {
+                maxSnow = j;
+            }
+        }
+    }
+    for (let i = 0; i <= 300; i++) {
+        for (let j = maxSnow; j <= maxSnow + 10; j++) {
+            if (j != 150) {
+                snowMatrixBack[i][j] = 0;
             }
         }
     }
@@ -119,11 +135,14 @@ function moveSnowflake(snowflake) {
     }
     snowflake.y += Math.floor(Math.random() * (2 - 1) + 1);
     //if (snowflake.y == cvs.height) {
-    if (snowflake.x >= 0 && snowflake.x <= 300 && snowMatrix[snowflake.x][snowflake.y] == 1 && snowflake.visible) {
+    if (snowflake.x >= 0 && snowflake.x <= 300 && snowflake.z == 0 && snowMatrix[snowflake.x][snowflake.y] == 1 && snowflake.visible) {
         //insertSnow(snowflake.x, snowflake.y);
-        insertSnowMatrix(snowflake.x, snowflake.y);
+        insertSnowMatrix(snowflake.x, snowflake.y, snowMatrix);
         //snowflake.x = Math.floor(Math.random() * cvs.width);
         //snowflake.y = 0;
+    }
+    else if (snowflake.x >= 0 && snowflake.x <= 300 && snowflake.z == 1 && snowMatrixBack[snowflake.x][snowflake.y] == 1 && snowflake.visible) {
+        insertSnowMatrix(snowflake.x, snowflake.y, snowMatrixBack);
     }
     if (snowflake.y == cvs.height) {
         snowflake.x = Math.floor(Math.random() * cvs.width);
@@ -133,24 +152,24 @@ function moveSnowflake(snowflake) {
     }
 }
 
-function insertSnowMatrix(x, y) {
+function insertSnowMatrix(x, y, matrix) {
     if (y < 150 && x > 0 && x < 300) {
-        if (snowMatrix[x - 1][y] == 1 && snowMatrix[x + 1][y] == 1) {
-            snowMatrix[x][y - 1] = 1;
+        if (matrix[x - 1][y] == 1 && matrix[x + 1][y] == 1) {
+            matrix[x][y - 1] = 1;
         }
     }
     else if (y < 150 && x == 0) {
-        if (snowMatrix[x + 1][y] == 1) {
-            snowMatrix[x][y - 1] = 1;
+        if (matrix[x + 1][y] == 1) {
+            matrix[x][y - 1] = 1;
         }
     }
     else if (y < 150 && x == 300) {
-        if (snowMatrix[x - 1][y] == 1) {
-            snowMatrix[x][y - 1] = 1;
+        if (matrix[x - 1][y] == 1) {
+            matrix[x][y - 1] = 1;
         }
     }
     else {
-        snowMatrix[x][y - 1] = 1;
+        matrix[x][y - 1] = 1;
     }
 }
 
@@ -181,7 +200,19 @@ function draw() {
     }
     // for (let j = 0; j < snow.length; j++) {
     //     ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
-    // }
+    // }    
+    for (let i = 0; i <= 300; i++) {
+        for (let j = 0; j <= 150; j++) {
+            if (snowMatrixBack[i][j] == 1) {
+                //ctx.fillRect(i, j, 1, 1);
+                let off = (j * id.width + i) * 4;
+                pixels[off] = 255;
+                pixels[off + 1] = 255;
+                pixels[off + 2] = 255;
+                pixels[off + 3] = 200;
+            }
+        }
+    }
     for (let i = 0; i <= 300; i++) {
         for (let j = 0; j <= 150; j++) {
             if (snowMatrix[i][j] == 1) {
@@ -207,7 +238,7 @@ function draw() {
 function checkGameOver() {    
     for (let i = 0; i <= 300; i++) {
         for (let j = 0; j <= 150; j++) {
-            if (snowMatrix[i][j] == 0) {
+            if (snowMatrix[i][j] == 0 || snowMatrixBack[i][j] == 0) {
                 return;
             }
         }
