@@ -189,30 +189,32 @@ function draw() {
 
     //let time1 = new Date().getTime();
 
-    for (let i = 0; i < snowflakes.length; i++) {
-        moveSnowflake(snowflakes[i]);
-        //ctx.fillRect(snowflakes[i].x, snowflakes[i].y, 1, 1);
-        let off = (snowflakes[i].y * id.width + snowflakes[i].x) * 4;
-        pixels[off] = 255;
-        pixels[off + 1] = 255;
-        pixels[off + 2] = 255;
-        pixels[off + 3] = snowflakes[i].visible ? snowflakes[i].z == 0 ? 255 : 200 : 0;
-    }
-    // for (let j = 0; j < snow.length; j++) {
-    //     ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
-    // }    
     for (let i = 0; i <= 300; i++) {
         for (let j = 0; j <= 150; j++) {
             if (snowMatrixBack[i][j] == 1) {
                 //ctx.fillRect(i, j, 1, 1);
                 let off = (j * id.width + i) * 4;
-                pixels[off] = 255;
-                pixels[off + 1] = 255;
-                pixels[off + 2] = 255;
-                pixels[off + 3] = 200;
+                pixels[off] = 211;
+                pixels[off + 1] = 211;
+                pixels[off + 2] = 211;
+                pixels[off + 3] = 255;
             }
         }
     }
+    for (let i = 0; i < snowflakes.length; i++) {
+        moveSnowflake(snowflakes[i]);
+        //ctx.fillRect(snowflakes[i].x, snowflakes[i].y, 1, 1);
+        let off = (snowflakes[i].y * id.width + snowflakes[i].x) * 4;
+        if (snowflakes[i].visible) {
+            pixels[off] = snowflakes[i].z == 0 ? 255 : 211;
+            pixels[off + 1] = snowflakes[i].z == 0 ? 255 : 211;
+            pixels[off + 2] = snowflakes[i].z == 0 ? 255 : 211;
+            pixels[off + 3] = 255;
+        }
+    }
+    // for (let j = 0; j < snow.length; j++) {
+    //     ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
+    // }
     for (let i = 0; i <= 300; i++) {
         for (let j = 0; j <= 150; j++) {
             if (snowMatrix[i][j] == 1) {
