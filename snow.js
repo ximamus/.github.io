@@ -4,6 +4,7 @@ ctx.fillStyle = 'white';
 //var id = ctx.getImageData(0, 0, cvs.width, cvs.height);
 //var pixels = id.data;
 
+let gameOver = false;
 const snowflakes = [];
 let snow = [];
 let qnty = 100;
@@ -26,6 +27,7 @@ function initWind() {
     wind.height = getRandomInt(50, 150);
     wind.force = getRandomInt(4, 8);
     wind.duration = getRandomInt(30, 60);
+    wind.layer = getRandomInt(0, 1);
 }
 
 function initSnowMatrix() {
@@ -42,10 +44,13 @@ function getSnowflakes() {
         const snowflake = {
             x: 0,
             y: 0,
-            inertion: 0
+            inertion: 0,
+            visible: true,
+            z: 0
         };
         snowflake.x = Math.floor(Math.random() * cvs.width);
         snowflake.y = Math.floor(Math.random() * cvs.height);
+        snowflake.z = getRandomInt(0, 1);        
         //snowflake.y = 0;
         snowflakes.push(snowflake);
     }
@@ -83,7 +88,7 @@ function moreSnow() {
 function moveSnowflake(snowflake) {
     if (Math.random() < 0.5) {
         snowflake.x += Math.random() < 0.5 ? -1 : 1;
-        if (wind.duration > 0 && snowflake.y > wind.positionY - wind.height / 2 && snowflake.y < wind.positionY + wind.height / 2) {
+        if (wind.duration > 0 && snowflake.y > wind.positionY - wind.height / 2 && snowflake.y < wind.positionY + wind.height / 2 && snowflake.z == wind.layer) {
             snowflake.inertion = wind.direction == 'right' ? wind.force : wind.force * -1
             snowflake.x += snowflake.inertion;
         }
@@ -94,17 +99,27 @@ function moveSnowflake(snowflake) {
             }
         }
         if (snowflake.x < 0) {
-            snowflake.x = 0;
-            snowflake.inertion = 0;
+            if (snowflake.inertion != 0) {
+                snowflake.visible = false;
+            }
+            else {
+                snowflake.x = 0;
+                snowflake.inertion = 0;
+            }
         }
         else if (snowflake.x > 300) {
-            snowflake.x = 300;
-            snowflake.inertion = 0;
+            if (snowflake.inertion != 0) {
+                snowflake.visible = false;
+            }
+            else {
+                snowflake.x = 300;
+                snowflake.inertion = 0;
+            }
         }
     }
     snowflake.y += Math.floor(Math.random() * (2 - 1) + 1);
     //if (snowflake.y == cvs.height) {
-    if (snowMatrix[snowflake.x][snowflake.y] == 1) {
+    if (snowflake.x >= 0 && snowflake.x <= 300 && snowMatrix[snowflake.x][snowflake.y] == 1 && snowflake.visible) {
         //insertSnow(snowflake.x, snowflake.y);
         insertSnowMatrix(snowflake.x, snowflake.y);
         //snowflake.x = Math.floor(Math.random() * cvs.width);
@@ -114,6 +129,7 @@ function moveSnowflake(snowflake) {
         snowflake.x = Math.floor(Math.random() * cvs.width);
         snowflake.y = 0;
         snowflake.inertion = 0;
+        snowflake.visible = true;
     }
 }
 
@@ -161,7 +177,7 @@ function draw() {
         pixels[off] = 255;
         pixels[off + 1] = 255;
         pixels[off + 2] = 255;
-        pixels[off + 3] = 255;
+        pixels[off + 3] = snowflakes[i].visible ? snowflakes[i].z == 0 ? 255 : 200 : 0;
     }
     // for (let j = 0; j < snow.length; j++) {
     //     ctx.fillRect(snow[j].x, snow[j].y, 1, 1);
@@ -200,6 +216,7 @@ function checkGameOver() {
     ctx.font = '30px Changa One';
     ctx.fillText('Завалило снегом!', 40, 80);
     clearInterval(run);
+    gameOver = true;
 }
 
 initSnowMatrix();
@@ -208,6 +225,7 @@ const run = setInterval(draw, 50);
 (function windLoop() {
     var timeout = Math.round(Math.random() * (8000 - 6000) + 6000);
     setTimeout(function() {
+        if (gameOver) return;
         initWind();
         windLoop();
     }, timeout);
